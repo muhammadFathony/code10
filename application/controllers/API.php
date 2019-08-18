@@ -8,6 +8,7 @@ class API extends CI_Controller {
 		parent::__construct();
 		$this->load->model('M_user');
 		$this->load->model('M_promo');
+		$this->load->model('M_akun_bank');
 	}
 
 	public function login()
@@ -232,15 +233,124 @@ class API extends CI_Controller {
 
 		if ($id_user == "") {
 			$response['error'] = TRUE;
-			$response['message'] = 'Field tidak boleh kosong';
+			$response['message'] = 'Gagal mengambil data';
 			$this->output->set_content_type('application/json')->set_output(json_encode($response));
 		} else {
 			$data = $this->M_user->cek_poin($id_user);
 			$response['error'] = FALSE;
-			$response['message'] = "Silahkan ambil atau tukarkan poin";
+			$response['message'] = "Sukses";
 			$response['data'] = $data;
 			$this->output->set_content_type('application/json')->set_output(json_encode($response));
 		}
+	}
+
+	public function tambah_bank()
+	{
+		$response = array('error' => TRUE,
+						  'message' => 'Gagal'
+					);
+		$obj = array('id_bank' => $this->M_akun_bank->generate_id_bank(),
+					 'nama_bank' => htmlentities($this->input->post('nama_bank',TRUE)),
+		 			);
+		$nmfile 					= 'Bank'.$obj['nama_bank'] . "_" .time();
+		$config['file_name'] 		= $nmfile; 
+		$config['upload_path'] = "./assets/images";
+		$config['allowed_types'] = 'gif|jpg|png|jpeg';
+		//$config['encrypt_name']	= TRUE;
+		$config['max_size'] = 10000;
+		$this->load->library('upload', $config);
+
+		if ($obj['nama_bank'] != "") {
+			$this->upload->do_upload("file");
+			$data = $this->upload->data();
+			$nama_upload = $data['file_name'];
+
+			$config['image_library'] = 'gd2';
+			$config['source_image'] = './assets/images/'.$data['file_name'];
+			$config['width'] = 600;
+			$config['height'] = 400;
+			$config['quality'] = '50%';
+			$config['new_image'] = './assets/thumb/'.$data['file_name'];
+
+			$this->load->library('image_lib', $config);
+			$this->image_lib->resize();
+			$data = $this->M_akun_bank->tambah_akun_bank($obj, $nama_upload);
+			$response['error'] = FALSE;
+			$response['message'] = 'Sukses';
+			$this->output->set_content_type('application/json')->set_output(json_encode($response));
+		} else {
+			$response['error'] = TRUE;
+			$response['message'] = 'Nama bank kosong';
+			$this->output->set_content_type('application/json')->set_output(json_encode($response));
+		}
+		
+		$this->output->set_content_type('application/json')->set_output(json_encode($response));
+	}
+
+	public function daftar_bank()
+	{
+		$response = array('error' => TRUE,
+						  'message' => 'Tidak ada data'
+					);
+		$check = $this->M_akun_bank->daftar_bank();
+		if ($check->num_rows() > 0 ) {
+			$data = $check->result();
+			$response['error'] = FALSE;
+			$response['message'] = 'Sukses';
+			$response['data'] = $data;
+			$this->output->set_content_type('application/json')->set_output(json_encode($response));
+		} else {
+			$response['error'] = TRUE;
+			$response['message'] = 'Data Kosong';
+			$this->output->set_content_type('application/json')->set_output(json_encode($response));
+		}
+
+		$this->output->set_content_type('application/json')->set_output(json_encode($response));
+	}
+
+	public function tambah_rekening()
+	{
+		$response = array('error' => TRUE,
+						  'message' => 'Gagal'
+						);
+		$obj = array('id_customers' => htmlentities($this->input->post('id_customers', TRUE)),
+					 'rekening' => htmlentities($this->input->post('rekening', TRUE)),
+					 'id_bank' => htmlentities($this->input->post('id_bank', TRUE))
+		 );
+		if ($obj['rekening'] == "" || $obj['id_bank'] == "") {
+			$response['error'] = TRUE;
+			$response['message'] = 'Field tidak boleh kosong';
+			$this->output->set_content_type('application/json')->set_output(json_encode($response));
+		} else {
+			$data = $this->M_akun_bank->tambah_rekening($obj);
+			$response['error'] = FALSE;
+			$response['message'] = 'Sukses';
+			$this->output->set_content_type('application/json')->set_output(json_encode($response));
+		}
+
+		$this->output->set_content_type('application/json')->set_output(json_encode($response));
+	}
+
+	public function daftar_rekening_customer()
+	{
+		$response = array('error' => TRUE,
+						  'message' => 'Data Kosong'
+		);
+
+		$check = $this->M_akun_bank->daftar_rekening_customer();
+		if ($check->num_rows() > 0) {
+			$data = $check->result();
+			$response['error'] = FALSE;
+			$response['message'] = 'Sukses';
+			$response['data'] = $data;
+			$this->output->set_content_type('application/json')->set_output(json_encode($response));
+		} else {
+			$response['error'] = TRUE;
+			$response['message'] = 'Tidak ada rekening';
+			$this->output->set_content_type('application/json')->set_output(json_encode($response));
+		}
+
+		$this->output->set_content_type('application/json')->set_output(json_encode($response));
 	}
 
 }
