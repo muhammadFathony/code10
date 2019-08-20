@@ -315,7 +315,8 @@ class API extends CI_Controller {
 						);
 		$obj = array('id_customers' => htmlentities($this->input->post('id_customers', TRUE)),
 					 'rekening' => htmlentities($this->input->post('rekening', TRUE)),
-					 'id_bank' => htmlentities($this->input->post('id_bank', TRUE))
+					 'id_bank' => htmlentities($this->input->post('id_bank', TRUE)),
+					 'nama' => htmlentities($this->input->post('nama', TRUE))
 		 );
 		if ($obj['rekening'] == "" || $obj['id_bank'] == "") {
 			$response['error'] = TRUE;
