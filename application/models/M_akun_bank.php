@@ -54,12 +54,13 @@ class M_akun_bank extends CI_Model {
 		return $data;
 	}
 
-	public function daftar_rekening_customer()
+	public function daftar_rekening_customer($id_user)
 	{
 		$this->db->select('a.*, b.nama_bank,b.gambar, c.nama_customers, c.alamat');
 		$this->db->from('rekening_customer a');
 		$this->db->join('akun_bank b', 'a.id_bank = b.id_bank', 'inner');
 		$this->db->join('customers c', 'a.id_customers = c.id_customers', 'inner');
+		$this->db->where('a.id_user', $id_user);
 		$data = $this->db->get();
 
 		return $data;

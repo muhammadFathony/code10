@@ -237,10 +237,17 @@ class API extends CI_Controller {
 			$this->output->set_content_type('application/json')->set_output(json_encode($response));
 		} else {
 			$data = $this->M_user->cek_poin($id_user);
-			$response['error'] = FALSE;
-			$response['message'] = "Sukses";
-			$response['data'] = $data;
-			$this->output->set_content_type('application/json')->set_output(json_encode($response));
+			if ($data->num_rows() > 0 ) {
+				$response['error'] = FALSE;
+				$response['message'] = "Sukses";
+				$response['data'] = $data->row();
+				$this->output->set_content_type('application/json')->set_output(json_encode($response));
+			} else {
+				$response['error'] = TRUE;
+				$response['message'] = 'Data Kosong';
+				$this->output->set_content_type('application/json')->set_output(json_encode($response));
+			}
+			
 		}
 	}
 
@@ -313,7 +320,11 @@ class API extends CI_Controller {
 		$response = array('error' => TRUE,
 						  'message' => 'Gagal'
 						);
-		$obj = array('id_customers' => htmlentities($this->input->post('id_customers', TRUE)),
+		$id_user = htmlentities($this->input->post('id_user', TRUE));
+		$this->db->where('id_user', $id_user);
+		$result = $this->db->get('user')->row();
+		$obj = array('id_user' => $id_user,
+					 'id_customers' => $result->id_customers,
 					 'rekening' => htmlentities($this->input->post('rekening', TRUE)),
 					 'id_bank' => htmlentities($this->input->post('id_bank', TRUE)),
 					 'nama' => htmlentities($this->input->post('nama', TRUE))
@@ -323,10 +334,12 @@ class API extends CI_Controller {
 			$response['message'] = 'Field tidak boleh kosong';
 			$this->output->set_content_type('application/json')->set_output(json_encode($response));
 		} else {
-			$data = $this->M_akun_bank->tambah_rekening($obj);
-			$response['error'] = FALSE;
-			$response['message'] = 'Sukses';
-			$this->output->set_content_type('application/json')->set_output(json_encode($response));
+			
+				$data = $this->M_akun_bank->tambah_rekening($obj);
+				$response['error'] = FALSE;
+				$response['message'] = 'Sukses';
+				$this->output->set_content_type('application/json')->set_output(json_encode($response));
+			
 		}
 
 		$this->output->set_content_type('application/json')->set_output(json_encode($response));
@@ -337,8 +350,8 @@ class API extends CI_Controller {
 		$response = array('error' => TRUE,
 						  'message' => 'Data Kosong'
 		);
-
-		$check = $this->M_akun_bank->daftar_rekening_customer();
+		$id_user = htmlentities($this->input->post('id_user', TRUE));
+		$check = $this->M_akun_bank->daftar_rekening_customer($id_user);
 		if ($check->num_rows() > 0) {
 			$data = $check->result();
 			$response['error'] = FALSE;
@@ -375,9 +388,9 @@ class API extends CI_Controller {
 			$response['message'] = 'Field ada boleh kosong';
 			$this->output->set_content_type('application/json')->set_output(json_encode($response));
 		} else{
-			if ($obj['nominal'] > $minimal) {
-				$data = $this->M_
-			}
+			// if ($obj['nominal'] > $minimal) {
+			// 	$data = $this->M_
+			// }
 		}
 	}
 

@@ -86,20 +86,30 @@ class M_user extends CI_Model {
 			);
 
 		$result = $this->db->insert('user', $data);
-		// if ($result) {
-		// 	$data1 = array('id_customers' => $id_customers,
-		// 				   'ktp'=>'-',
-		// 				   'nama_customers'=> $obj['nama_lengkap'],
-		// 				   'jenis_kelamin'=> 2,
-		// 				   'status' => 2,
-		// 				   'nomor_kk' => '-',
-		// 				   'ttl' => date("Y-m-d"),
-		// 				   'alamat' => '-'
-		// 				);
-		// 	$result1 = $this->db->insert('customers', $data1);
-		// 	return $result1;
-		// }
 
+		if ($result) {
+			$data1 = array('id_customers' => $id_customers,
+						   'ktp' => '-',
+						   'nama_customers' => $obj['nama_lengkap'],
+						   'jenis_kelamin' => 0,
+						   'status' => 0,
+						   'nomor_kk' => '-',
+						   'ttl'=> '',
+						   'alamat' => '-'
+				 );
+			$result1 = $this->db->insert('customers', $data1);
+				if ($result1) {
+					$data_poin = array('id_customers' => $id_customers,
+					  'id_user' => $id_user,
+					  'poin' => 0,
+					  'nominal' => 0
+						 );
+					$poin = $this->db->insert('poin', $data_poin);
+
+					return $poin;
+				}
+			return $result1;
+		}
 		return $result;
 	}
 
@@ -130,12 +140,13 @@ class M_user extends CI_Model {
 
 	public function cek_poin($id_user)
 	{
-		$this->db->select('id_user, nama_user, username, email, id_customers, referal, poin');
+		$this->db->select('user.id_user, user.nama_user, user.username, user.email, user.id_customers, user.referal, poin.poin');
 		$this->db->from('user');
-		$this->db->where('id_user', $id_user);
+		$this->db->join('poin', 'user.id_user = poin.id_user', 'inner');
+		$this->db->where('user.id_user', $id_user);
 		$data = $this->db->get();
 
-		return $data->row();
+		return $data;
 	}
 
 }
