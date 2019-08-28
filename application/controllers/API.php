@@ -9,6 +9,7 @@ class API extends CI_Controller {
 		$this->load->model('M_user');
 		$this->load->model('M_promo');
 		$this->load->model('M_akun_bank');
+		$this->load->model('M_poin');
 	}
 
 	public function login()
@@ -321,10 +322,7 @@ class API extends CI_Controller {
 						  'message' => 'Gagal'
 						);
 		$id_user = htmlentities($this->input->post('id_user', TRUE));
-		$this->db->where('id_user', $id_user);
-		$result = $this->db->get('user')->row();
 		$obj = array('id_user' => $id_user,
-					 'id_customers' => $result->id_customers,
 					 'rekening' => htmlentities($this->input->post('rekening', TRUE)),
 					 'id_bank' => htmlentities($this->input->post('id_bank', TRUE)),
 					 'nama' => htmlentities($this->input->post('nama', TRUE))
@@ -367,15 +365,14 @@ class API extends CI_Controller {
 		$this->output->set_content_type('application/json')->set_output(json_encode($response));
 	}
 
-	public function penarikan_poin()
+	public function penarikan()
 	{
 		$response = array('error' => TRUE,
 						  'message' => 'Gagal'
 				);
 
-		$obj = array(
+		$obj = array('id_user' => htmlentities($this->input->post('id_user', TRUE)),
 				'nominal' => htmlentities($this->input->post('nominal', TRUE)),
-				'id_customers' => htmlentities($this->input->post('id_customers', TRUE)),
 				'id_bank' => htmlentities($this->input->post('id_bank', TRUE)),
 				'rekening' => htmlentities($this->input->post('rekening', TRUE)),
 				'nama' => htmlentities($this->input->post('nama', TRUE))
@@ -383,14 +380,21 @@ class API extends CI_Controller {
 
 		$minimal = 50000;
 
-		if ($obj['rekening'] == "" || $obj['id_bank'] == "" || $id_customers == "") {
+		if ($obj['rekening'] == "" || $obj['id_bank'] == "" || $obj['id_user'] == "") {
 			$response['error'] = TRUE;
-			$response['message'] = 'Field ada boleh kosong';
+			$response['message'] = 'Field ada yang kosong';
 			$this->output->set_content_type('application/json')->set_output(json_encode($response));
 		} else{
-			// if ($obj['nominal'] > $minimal) {
-			// 	$data = $this->M_
-			// }
+			if ($obj['nominal'] > $minimal) {
+				$data = $this->M_poin->penarikan($obj);
+				$response['error'] = FALSE;
+				$response['message'] = 'Sukses';
+				$this->output->set_content_type('application/json')->set_output(json_encode($response));
+			} else {
+				$response['error'] = TRUE;
+				$response['message'] = 'Gagal';
+				$this->output->set_content_type('application/json')->set_output(json_encode($response));
+			}
 		}
 	}
 

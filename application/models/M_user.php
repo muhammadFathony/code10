@@ -93,13 +93,13 @@ class M_user extends CI_Model {
 						   'nama_customers' => $obj['nama_lengkap'],
 						   'jenis_kelamin' => 0,
 						   'status' => 0,
-						   'nomor_kk' => '-',
+						   'npwp' => '-',
 						   'ttl'=> '',
 						   'alamat' => '-'
 				 );
 			$result1 = $this->db->insert('customers', $data1);
 				if ($result1) {
-					$data_poin = array('id_customers' => $id_customers,
+					$data_poin = array(
 					  'id_user' => $id_user,
 					  'poin' => 0,
 					  'nominal' => 0
