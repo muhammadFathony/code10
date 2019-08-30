@@ -22,7 +22,7 @@ class API extends CI_Controller {
 				'password' => htmlentities($this->input->post('password', TRUE))
 			);
 
-		$verify = $this->M_user->auth_validation($obj);
+		$verify = $this->M_user->api_auth_validation($obj);
 
 		if ($obj['username'] != "" && $obj['password'] != "") {
 			if ($verify) {
@@ -95,7 +95,7 @@ class API extends CI_Controller {
 				if ($obj['username'] != "" && $obj['email'] != "" && $obj['password'] != "") {
 					$response["error"] = FALSE;
 					$response["message"] = 'Registration Success';
-					$data = $this->M_user->register($obj);
+					$data = $this->M_user->api_register($obj);
 					$this->output->set_content_type('application/json')->set_output(json_encode($response));
 				} else {
 					$response["error"] = TRUE;
@@ -118,7 +118,7 @@ class API extends CI_Controller {
 					 'username' => htmlentities($this->input->post('username', TRUE))
 					 );
 
-		$data = $this->M_user->auth_validation_email($obj);
+		$data = $this->M_user->api_auth_validation_email($obj);
 		$this->db->where('email', $obj['email']);
 		$check2 = $this->db->get('user');
 
@@ -142,9 +142,9 @@ class API extends CI_Controller {
 	{
 		$response= array('error' => true,
 						 'Message' => 'Promo Kosong');
-		$data = $this->M_promo->Getpromo()->result();
+		$data = $this->M_promo->api_Getpromo()->result();
 		
-		$check = $this->M_promo->Getpromo();
+		$check = $this->M_promo->api_Getpromo();
 		if ($check->num_rows() > 0 ) {
 			$response['error'] = FALSE;
 			$response['Message'] = 'Berhasil';
@@ -217,7 +217,7 @@ class API extends CI_Controller {
 			$response['message'] = 'Id User Kosong';
 			$this->output->set_content_type('application/json')->set_output(json_encode($response));
 		} else {
-			$data = $this->M_user->get_profil($id_user);
+			$data = $this->M_user->api_get_profil($id_user);
 			$response['error'] = FALSE;
 			$response['message'] = 'Berhasil';
 			$response['data'] =  $data;
@@ -237,7 +237,7 @@ class API extends CI_Controller {
 			$response['message'] = 'Gagal mengambil data';
 			$this->output->set_content_type('application/json')->set_output(json_encode($response));
 		} else {
-			$data = $this->M_user->cek_poin($id_user);
+			$data = $this->M_user->api_cek_poin($id_user);
 			if ($data->num_rows() > 0 ) {
 				$response['error'] = FALSE;
 				$response['message'] = "Sukses";
@@ -300,7 +300,7 @@ class API extends CI_Controller {
 		$response = array('error' => TRUE,
 						  'message' => 'Tidak ada data'
 					);
-		$check = $this->M_akun_bank->daftar_bank();
+		$check = $this->M_akun_bank->api_daftar_bank();
 		if ($check->num_rows() > 0 ) {
 			$data = $check->result();
 			$response['error'] = FALSE;
@@ -333,7 +333,7 @@ class API extends CI_Controller {
 			$this->output->set_content_type('application/json')->set_output(json_encode($response));
 		} else {
 			
-				$data = $this->M_akun_bank->tambah_rekening($obj);
+				$data = $this->M_akun_bank->api_tambah_rekening($obj);
 				$response['error'] = FALSE;
 				$response['message'] = 'Sukses';
 				$this->output->set_content_type('application/json')->set_output(json_encode($response));
@@ -349,7 +349,7 @@ class API extends CI_Controller {
 						  'message' => 'Data Kosong'
 		);
 		$id_user = htmlentities($this->input->post('id_user', TRUE));
-		$check = $this->M_akun_bank->daftar_rekening_customer($id_user);
+		$check = $this->M_akun_bank->api_daftar_rekening_customer($id_user);
 		if ($check->num_rows() > 0) {
 			$data = $check->result();
 			$response['error'] = FALSE;
@@ -373,20 +373,18 @@ class API extends CI_Controller {
 
 		$obj = array('id_user' => htmlentities($this->input->post('id_user', TRUE)),
 				'nominal' => htmlentities($this->input->post('nominal', TRUE)),
-				'id_bank' => htmlentities($this->input->post('id_bank', TRUE)),
 				'rekening' => htmlentities($this->input->post('rekening', TRUE)),
-				'nama' => htmlentities($this->input->post('nama', TRUE))
 			);
 
 		$minimal = 50000;
 
-		if ($obj['rekening'] == "" || $obj['id_bank'] == "" || $obj['id_user'] == "") {
+		if ($obj['rekening'] == "" || $obj['id_user'] == "") {
 			$response['error'] = TRUE;
 			$response['message'] = 'Field ada yang kosong';
 			$this->output->set_content_type('application/json')->set_output(json_encode($response));
 		} else{
 			if ($obj['nominal'] > $minimal) {
-				$data = $this->M_poin->penarikan($obj);
+				$data = $this->M_poin->api_penarikan($obj);
 				$response['error'] = FALSE;
 				$response['message'] = 'Sukses';
 				$this->output->set_content_type('application/json')->set_output(json_encode($response));
@@ -395,6 +393,33 @@ class API extends CI_Controller {
 				$response['message'] = 'Gagal';
 				$this->output->set_content_type('application/json')->set_output(json_encode($response));
 			}
+		}
+	}
+
+	public function withdraw()
+	{
+		$response = array('error' => TRUE,
+						  'message' => 'Gagal'
+				);
+
+		$obj = array('id_penarikan' => htmlentities($this->input->post('id_penarikan', TRUE)),
+					 'id_user' => htmlentities($this->input->post('id_user', TRUE)),
+					 'nominal_penarikan' => htmlentities($this->input->post('nominal_penarikan', TRUE)),
+		 );
+		
+		$this->db->where('id_penarikan', $obj['id_penarikan']);
+		$this->db->where('status_transaksi', 0);
+		$cek = $this->db->get('penarikan_poin')->row();
+
+		if ($cek->status == 0) {
+			$response['error'] = TRUE;
+			$response['message'] = 'Transaksi sudah selesai';
+			$this->output->set_content_type('application/json')->set_output(json_encode($response));
+		} else {
+			$data = $this->M_poin->api_withdraw($obj);
+			$response['error'] = FALSE;
+			$response['message'] = 'Berhasil';
+			$this->output->set_content_type('application/json')->set_output(json_encode($response));
 		}
 	}
 

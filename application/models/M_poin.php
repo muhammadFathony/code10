@@ -24,19 +24,44 @@ class M_poin extends CI_Model {
 		  return $kodejadi;  
 	}
 
-	public function penarikan($obj)
+	public function api_penarikan($obj)
 	{
+		$this->db->where('rekening', $obj['rekening']);
+		$getbank = $this->db->get('rekening_customer')->row();
 		$data = array('id_penarikan' => $this->generate_idpenarikan(),
 					  'id_user' => $obj['id_user'],
 					  'nominal_penarikan' => $obj['nominal'],
-					  'id_bank' => $obj['id_bank'],
-					  'rekening' => $obj['rekening'],	
+					  'id_bank' => $getbank->id_bank,
+					  'rekening' => $obj['rekening'],
+					  'status' => 1,
+					  'status_transaksi' => 0	
 		);
 
 		
 		$result = $this->db->insert('penarikan_poin', $data);
 		
 		return $result;
+	}
+
+	public function api_withdraw($obj)
+	{
+		$nominal = $obj['nominal_penarikan'];
+		$this->db->set('nominal_penarikan', $nominal);
+		$this->db->set('status', 0);
+		$this->db->where('id_penarikan', $obj['id_penarikan']);
+		$this->db->where('id_user', $obj['id_user']);
+		$update_status = $this->db->update('penarikan_poin');
+		
+			if ($update_status == TRUE) {
+				$this->db->set('poin', "poin - $nominal", FALSE);
+				$this->db->where('id_user', $obj['id_user']);
+				$withdraw = $this->db->update('poin');
+
+				return $withdraw;
+			} else {
+				echo 'error';
+			}
+		return $update_status;
 	}
 
 }

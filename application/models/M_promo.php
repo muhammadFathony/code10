@@ -38,7 +38,7 @@ class M_promo extends CI_Model {
 		return $data1;
 	}
 
-	public function Getpromo()
+	public function api_Getpromo()
 	{
 		$this->db->select('*');
 		$this->db->from('promo');

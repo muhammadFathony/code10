@@ -69,7 +69,7 @@ class M_user extends CI_Model {
 		  return $kodejadi;  
 	}
 
-	public function register($obj)
+	public function api_register($obj)
 	{
 
 		$password = password_hash($obj['password'], PASSWORD_DEFAULT);
@@ -102,7 +102,6 @@ class M_user extends CI_Model {
 					$data_poin = array(
 					  'id_user' => $id_user,
 					  'poin' => 0,
-					  'nominal' => 0
 						 );
 					$poin = $this->db->insert('poin', $data_poin);
 
@@ -113,7 +112,7 @@ class M_user extends CI_Model {
 		return $result;
 	}
 
-	public function auth_validation($obj)
+	public function api_auth_validation($obj)
 	{
 		$this->db->where('username', $obj['username']);
 		$data = $this->db->get('user')->row();
@@ -121,7 +120,7 @@ class M_user extends CI_Model {
 		return $data;
 	}
 
-	public function auth_validation_email($obj)
+	public function api_auth_validation_email($obj)
 	{
 		$this->db->where('email', $obj['email']);
 		$data = $this->db->get('user')->row();
@@ -129,7 +128,7 @@ class M_user extends CI_Model {
 		return $data;
 	}
 
-	public function get_profil($id_user)
+	public function api_get_profil($id_user)
 	{
 		$this->db->select('nomor, id_user, nama_user, username, email, telp, referal');
 		$this->db->where('id_user', $id_user);
@@ -138,7 +137,7 @@ class M_user extends CI_Model {
 		return $data->row();
 	}
 
-	public function cek_poin($id_user)
+	public function api_cek_poin($id_user)
 	{
 		$this->db->select('user.id_user, user.nama_user, user.username, user.email, user.id_customers, user.referal, poin.poin');
 		$this->db->from('user');

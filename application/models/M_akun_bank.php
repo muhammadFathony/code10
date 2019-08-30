@@ -37,7 +37,7 @@ class M_akun_bank extends CI_Model {
 		return $data;
 	}	
 
-	public function daftar_bank()
+	public function api_daftar_bank()
 	{
 		$this->db->select('*');
 		$this->db->from('akun_bank');
@@ -47,14 +47,14 @@ class M_akun_bank extends CI_Model {
 		return $data;
 	}
 
-	public function tambah_rekening($obj)
+	public function api_tambah_rekening($obj)
 	{
 		$data = $this->db->insert('rekening_customer', $obj);
 
 		return $data;
 	}
 
-	public function daftar_rekening_customer($id_user)
+	public function api_daftar_rekening_customer($id_user)
 	{
 		$this->db->select('a.*, b.nama_bank,b.gambar, c.nama_user');
 		$this->db->from('rekening_customer a');
