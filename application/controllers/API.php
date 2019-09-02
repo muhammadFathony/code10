@@ -390,7 +390,7 @@ class API extends CI_Controller {
 				$this->output->set_content_type('application/json')->set_output(json_encode($response));
 			} else {
 				$response['error'] = TRUE;
-				$response['message'] = 'Gagal';
+				$response['message'] = 'Minimal Penarikan Rp 50.000';
 				$this->output->set_content_type('application/json')->set_output(json_encode($response));
 			}
 		}
@@ -421,6 +421,28 @@ class API extends CI_Controller {
 			$response['message'] = 'Berhasil';
 			$this->output->set_content_type('application/json')->set_output(json_encode($response));
 		}
+	}
+
+	public function histori()
+	{
+		$response = array('error' => TRUE,
+						  'message' => 'Gagal'
+				);
+
+		//$id_user = 'NIU-201908-000001';
+		$id_user = $this->input->post('id_user');
+		$data = $this->M_poin->api_histori($id_user);
+		if ($data->num_rows() > 0) {
+			$response['error'] = FALSE;
+			$response['message'] = 'Berhasil';
+			$response['datahistory'] = $data->result();
+			$this->output->set_content_type('application/json')->set_output(json_encode($response));	
+		} else {
+			$response['error'] = TRUE;
+			$response['message'] = 'Data Kosong';
+			$this->output->set_content_type('application/json')->set_output(json_encode($response));	
+		}
+				
 	}
 
 }

@@ -148,6 +148,57 @@ class M_user extends CI_Model {
 		return $data;
 	}
 
+	public function signup($obj)
+	{
+		$password = password_hash($obj['password'], PASSWORD_DEFAULT);
+		$id_user = $this->generate_user();
+		$id_customers = $this->generate_customers();
+		$data = array('nama_user' => $obj['nama_lengkap'],
+					  'username' => $obj['username'],
+					  'telp' => $obj['telp'],
+					  'email' => $obj['email'],
+					  'id_user' => $id_user,
+					  'password' => $password,
+					  'id_customers'=> $id_customers,
+					  'referal' => $obj['referal']
+			);
+
+		$result = $this->db->insert('user', $data);
+
+		if ($result) {
+			$data1 = array('id_customers' => $id_customers,
+						   'ktp' => '-',
+						   'nama_customers' => $obj['nama_lengkap'],
+						   'jenis_kelamin' => 0,
+						   'status' => 0,
+						   'npwp' => '-',
+						   'ttl'=> '',
+						   'alamat' => '-'
+				 );
+			$result1 = $this->db->insert('customers', $data1);
+				if ($result1) {
+					$data_poin = array(
+					  'id_user' => $id_user,
+					  'poin' => 0,
+						 );
+					$poin = $this->db->insert('poin', $data_poin);
+
+					return $poin;
+				}
+			return $result1;
+		}
+		return $result;
+	}
+
+	public function get_listuser()
+	{
+		$this->db->select('*');
+		$this->db->from('user');
+		$data = $this->db->get();
+
+		return $data;
+	}
+
 }
 
 /* End of file M_user.php */
