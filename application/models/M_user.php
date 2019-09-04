@@ -199,6 +199,26 @@ class M_user extends CI_Model {
 		return $data;
 	}
 
+	public function edit_user($obj)
+	{
+		$this->db->set('nama_user', $obj['nama_user']);
+		$this->db->set('username', $obj['username']);
+		$this->db->set('email', $obj['email']);
+		$this->db->set('telp', $obj['telp']);
+		$this->db->set('level', $obj['level']);
+		$this->db->where('id_user', $obj['id_user']);
+		$data = $this->db->update('user');
+
+		return $data;
+	}
+
+	public function delete_user($id_user)
+	{
+		$this->db->where('id_user', $id_user);
+		$data = $this->db->delete('user');
+
+		return $data;
+	}
 }
 
 /* End of file M_user.php */

@@ -69,7 +69,7 @@ class M_poin extends CI_Model {
 		$this->db->select('penarikan_poin.nominal_penarikan, penarikan_poin.status, penarikan_poin.status_transaksi, penarikan_poin.created_at, akun_bank.nama_bank, akun_bank.gambar, rekening_customer.nama, rekening_customer.rekening, (CASE WHEN penarikan_poin.status = 0 THEN "selesai" WHEN penarikan_poin.status = 1 THEN "proses" ELSE "Batal" END) as statusnew,  (CASE WHEN penarikan_poin.status_transaksi = 0 THEN "penarikan"  ELSE "Dapat" END) as st_transaksi, DATE_FORMAT(penarikan_poin.created_at, "%d-%m-%Y") as tanggal ');
 		$this->db->from('penarikan_poin');
 		$this->db->join('akun_bank', 'penarikan_poin.id_bank = akun_bank.id_bank', 'inner');
-		$this->db->join('rekening_customer', 'penarikan_poin.id_user = rekening_customer.id_user', 'inner');
+		$this->db->join('rekening_customer', 'penarikan_poin.rekening = rekening_customer.rekening', 'inner');
 		$this->db->where('penarikan_poin.id_user', $id_user);
 		$data = $this->db->get();
 

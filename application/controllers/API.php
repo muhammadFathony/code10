@@ -440,9 +440,15 @@ class API extends CI_Controller {
 		} else {
 			$response['error'] = TRUE;
 			$response['message'] = 'Data Kosong';
+			$response['datahistory'] = $data->result();
 			$this->output->set_content_type('application/json')->set_output(json_encode($response));	
 		}
 				
+	}
+
+	public function pengajuan()
+	{
+		
 	}
 
 }
