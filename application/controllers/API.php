@@ -10,6 +10,7 @@ class API extends CI_Controller {
 		$this->load->model('M_promo');
 		$this->load->model('M_akun_bank');
 		$this->load->model('M_poin');
+		$this->load->model('M_pengajuan');
 	}
 
 	public function login()
@@ -448,7 +449,118 @@ class API extends CI_Controller {
 
 	public function pengajuan()
 	{
+		$response = array('error' => TRUE,
+						  'message' => 'Gagal'
+				);
 		
+		// jenis pinjaman = KPR, KPA, Multiguna TOC
+		$obj = array('id_user' => htmlentities($this->input->post('id_user', TRUE)),
+					 'jenis_pinjaman' => htmlentities($this->input->post('jenis_pinjaman', TRUE)),
+					 'nama_lengkap' => htmlentities($this->input->post('nama_lengkap', TRUE)),
+					 'ktp' => htmlentities($this->input->post('ktp', TRUE)),
+					 'npwp' => htmlentities($this->input->post('npwp', TRUE)),
+					 'status_kawin' => htmlentities($this->input->post('status_kawin', TRUE)),
+					 'jumlah_anak' => htmlentities($this->input->post('jumlah_anak', TRUE)),
+					 'alamat' => htmlentities($this->input->post('alamat', TRUE)),
+					 'telp' => htmlentities($this->input->post('telp', TRUE)),
+					//batas data agunan
+					 'jenis_agunan' => htmlentities($this->input->post('jenis_agunan', TRUE)),
+					 'luas_tanah' => htmlentities($this->input->post('luas_tanah', TRUE)),
+					 'merkseritahun' => htmlentities($this->input->post('merkseritahun', TRUE)),
+					 'nilai_agunan' => htmlentities($this->input->post('nilai_agunan', TRUE)),
+					 'lokasi_agunan' => htmlentities($this->input->post('lokasi_agunan', TRUE)),
+					//batas rencana pengajuan kredit
+					'besar_pinjaman' => htmlentities($this->input->post('besar_pinjaman', TRUE)),
+					'jangka_waktu' => htmlentities($this->input->post('jangka_waktu', TRUE)),
+					// pekerjaan dan waktu
+					'nama_tempat_kerja' => htmlentities($this->input->post('nama_tempat_kerja', TRUE)),
+					'bidang_usaha' => htmlentities($this->input->post('bidang_usaha', TRUE)),
+					'jabatan' => htmlentities($this->input->post('jabatan', TRUE)),
+					'nominal_penghasilan' => htmlentities($this->input->post('nominal_penghasilan', TRUE)),
+					'penghasilan_lain' => htmlentities($this->input->post('penghasilan_lain', TRUE))
+		 );
+
+		$nmfile 					= 'ktp'.$obj['nama_lengkap'] . "_" .time();
+		$config['file_name'] 		= $nmfile; 
+		$config['upload_path'] = "./assets/images";
+		$config['allowed_types'] = 'gif|jpg|png|jpeg';
+		//$config['encrypt_name']	= TRUE;
+		$config['max_size'] = 10000;
+		$this->load->library('upload', $config);
+
+		if ($obj['jenis_pinjaman'] == "" || $obj['ktp'] == ""  || $obj['jenis_agunan'] == "" || $obj['besar_pinjaman'] == "" || $obj['jangka_waktu'] == "" || $obj['nama_tempat_kerja'] == "" || $obj['nominal_penghasilan'] == "" || $this->upload->do_upload("foto_ktp") == "" ) {
+			$response['error'] = TRUE;
+			$response['message'] = 'Field ada yang kosong';
+			$this->output->set_content_type('application/json')->set_output(json_encode($response));
+		} else {
+
+			$this->upload->do_upload("foto_ktp");
+			$data = $this->upload->data();
+			$ktp = $data['file_name'];
+
+			$config['image_library'] = 'gd2';
+			$config['source_image'] = './assets/images/'.$data['file_name'];
+			$config['width'] = 600;
+			$config['height'] = 400;
+			$config['quality'] = '50%';
+			$config['new_image'] = './assets/thumb/ktp/'.$data['file_name'];
+
+			$this->load->library('image_lib', $config);
+			$this->image_lib->resize();
+
+			if ($this->upload->do_upload("foto_ktp") != "") {
+				$nmslip 					= 'slip'.$obj['nama_lengkap'] . "_" .time();
+				$config1['file_name'] 		= $nmslip; 
+				$config1['upload_path'] = "./assets/images";
+				$config1['allowed_types'] = 'gif|jpg|png|jpeg';
+				//$config['encrypt_name']	= TRUE;
+				$config1['max_size'] = 10000;
+				$this->upload->initialize($config1);
+
+				$this->upload->do_upload("foto_slipgaji");
+				$data1 = $this->upload->data();
+				$slipgaji = $data1['file_name'];
+				$config2['image_library'] = 'gd2';
+				$config2['source_image'] = './assets/images/'.$data1['file_name'];
+				$config2['width'] = 600;
+				$config2['height'] = 400;
+				$config2['quality'] = '50%';
+				$config2['new_image'] = './assets/thumb/slip/'.$data1['file_name'];
+
+				$this->image_lib->initialize($config2);
+				$this->image_lib->resize();
+
+				$nmrekkoran 					= 'rek'.$obj['nama_lengkap'] . "_" .time();
+				$config3['file_name'] 		= $nmrekkoran; 
+				$config3['upload_path'] = "./assets/images";
+				$config3['allowed_types'] = 'gif|jpg|png|jpeg';
+				//$config['encrypt_name']	= TRUE;
+				$config3['max_size'] = 10000;
+				$this->upload->initialize($config3);
+
+				$this->upload->do_upload("foto_rekkoran");
+				$data3 = $this->upload->data();
+				$rekkoran = $data3['file_name'];
+				$config4['image_library'] = 'gd2';
+				$config4['source_image'] = './assets/images/'.$data3['file_name'];
+				$config4['width'] = 600;
+				$config4['height'] = 400;
+				$config4['quality'] = '50%';
+				$config4['new_image'] = './assets/thumb/rekkoran/'.$data3['file_name'];
+
+				$this->image_lib->initialize($config4);
+				$this->image_lib->resize();
+			} else {
+				$response['error'] = TRUE;
+				$response['message'] ='Silahkan foto upload ktp';
+				$this->output->set_content_type('application/json')->set_output(json_encode($response));
+			}
+
+			$data = $this->M_pengajuan->simpan_pengajuan($obj, $ktp, $slipgaji, $rekkoran);
+			$response['error']= FALSE;
+			$response['message'] = 'Berhasil';
+			$this->output->set_content_type('application/json')->set_output(json_encode($response));
+		}
 	}
 
 }
