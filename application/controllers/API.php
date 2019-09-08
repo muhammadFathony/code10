@@ -457,6 +457,7 @@ class API extends CI_Controller {
 		$obj = array('id_user' => htmlentities($this->input->post('id_user', TRUE)),
 					 'jenis_pinjaman' => htmlentities($this->input->post('jenis_pinjaman', TRUE)),
 					 'nama_lengkap' => htmlentities($this->input->post('nama_lengkap', TRUE)),
+					 'rekening' => htmlentities($this->input->post('rekening')),
 					 'ktp' => htmlentities($this->input->post('ktp', TRUE)),
 					 'npwp' => htmlentities($this->input->post('npwp', TRUE)),
 					 'status_kawin' => htmlentities($this->input->post('status_kawin', TRUE)),
@@ -556,10 +557,39 @@ class API extends CI_Controller {
 				$this->output->set_content_type('application/json')->set_output(json_encode($response));
 			}
 
-			$data = $this->M_pengajuan->simpan_pengajuan($obj, $ktp, $slipgaji, $rekkoran);
-			$response['error']= FALSE;
+			$this->db->where('id_user', $obj['id_user']);
+			$this->db->where('rekening', $obj['rekening']);
+			$cek = $this->db->get('rekening_customer');
+			if ($cek->num_rows() > 0) {
+				$data = $this->M_pengajuan->simpan_pengajuan($obj, $ktp, $slipgaji, $rekkoran);
+				$response['error']= FALSE;
+				$response['message'] = 'Berhasil';
+				$this->output->set_content_type('application/json')->set_output(json_encode($response));
+			} else {
+				$response['error'] = TRUE;
+				$response['message'] = 'Rekening kosong';
+				$this->output->set_content_type('application/json')->set_output(json_encode($response));
+			}
+		}
+	}
+
+	public function histori_pengajuan()
+	{
+		$response = array('error' => TRUE,
+						  'message' => 'Histori kosong'
+			);
+		$id_user = $this->input->post('id_user');
+		$data = $this->M_pengajuan->histori_pengajuan($id_user);
+		if ($data->num_rows() > 0 ) {
+			$response['error'] = FALSe;
 			$response['message'] = 'Berhasil';
+			$response['datahistory'] = $data->result();
 			$this->output->set_content_type('application/json')->set_output(json_encode($response));
+		} else {
+			$response['error'] = TRUE;
+			$response['message'] = 'Belum ada pengajuan';
+			$response['datahistory']= $data->result();
+			$this->output->set_content_type('application/json')->set_output(json_encode($response)); 
 		}
 	}
 

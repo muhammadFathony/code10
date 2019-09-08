@@ -72,6 +72,7 @@ class M_pengajuan extends CI_Model {
 					 'id_user' => $obj['id_user'],
 					 'id_jenis' => $obj['jenis_pinjaman'],
 					 'jenis_agunan' => $obj['jenis_agunan'],
+					 'rekening' => $obj['rekening'],
 					 'luas_tanah' => $obj['luas_tanah'],
 					 'merkseritahun' => $obj['merkseritahun'],
 					 'nilai_agunan' => $obj['nilai_agunan'],
@@ -116,6 +117,22 @@ class M_pengajuan extends CI_Model {
 		$this->db->join('customers', 'customers.id_customers = user.id_customers', 'inner');
 		$this->db->where('user.id_customers', $id_customers);
 		$data = $this->db->get()->row();
+
+		return $data;
+	}
+
+	public function histori_pengajuan($id_user)
+	{
+		$this->db->select("A.id_pengajuan, A.id_user, C.nama_customers, D.id_jenis, D.jenis_pinjaman, DATE_FORMAT(A.created_at, '%d-%m-%Y') as tanggal, A.besar_pinjaman, (CASE WHEN A.status_pengajuan = 0 THEN 'Batal' WHEN status_pengajuan = 1 THEN 'Selesai' ELSE 'Proses' END) as status, F.nama_bank");
+		$this->db->from('pengajuan A');
+		$this->db->join('user B', 'B.id_user = A.id_user', 'inner');
+		$this->db->join('customers C', 'B.id_customers = C.id_customers', 'inner');
+		$this->db->join('jenis_pinjaman D', 'A.id_jenis = D.id_jenis', 'inner');
+		$this->db->join('rekening_customer E', 'A.rekening = E.rekening', 'inner');
+		$this->db->join('akun_bank F', 'E.id_bank = F.id_bank', 'inner');
+		$this->db->where('A.id_user', $id_user);
+		$this->db->order_by('tanggal', 'desc');
+		$data = $this->db->get();
 
 		return $data;
 	}
