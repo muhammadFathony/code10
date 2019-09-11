@@ -32,25 +32,50 @@ class M_pengajuan extends CI_Model {
 		return $data;
 	}
 
-	public function simpan_customer($obj)
+	public function simpan_customer($obj, $ktp, $slipgaji, $rekkoran)
 	{
 		date_default_timezone_set('Asia/Jakarta');
 		$waktu = date("Y-m-d H:i:s");
-		$id_customers = $this->session->userdata('id_customers');
-		$this->db->set('ktp',$obj['nik']);
-		$this->db->set('jenis_kelamin',$obj['jenis_kelamin']);
-		$this->db->set('status',$obj['status']);
-		$this->db->set('alamat',$obj['alamat']);
-		$this->db->set('jumlah_anak',$obj['jml_anak']);
-		$this->db->set('updated_at',$waktu);
-		$this->db->set('npwp',$obj['npwp']);
-		// $this->db->set('',$obj['']);
-		// $this->db->set('',$obj['']);
-		// $this->db->set('',$obj['']);
-		$this->db->where('id_customers', $obj['idc']);
-		$data = $this->db->update('customers');
+		$id_user = $this->session->userdata('id_user');
+		$data = array('id_pengajuan' => $this->generate_pengajuan(),
+					 'id_user' => $id_user,
+					 'id_jenis' => $obj['jenis_pinjaman'],
+					 'jenis_agunan' => $obj['jenis_agunan'],
+					 'rekening' => $obj['rekening'],
+					 'luas_tanah' => $obj['luas_tanah'],
+					 'merkseritahun' => $obj['merkseritahun'],
+					 'nilai_agunan' => $obj['nilai_agunan'],
+					 'lokasi_agunan' => $obj['lokasi_agunan'],
+					 'besar_pinjaman' => $obj['besar_pinjaman'],
+					 'jangka_waktu' => $obj['jangka_waktu'],
+					 'nama_tempat_kerja' => $obj['nama_tempat_kerja'],
+					 'bidang_usaha' => $obj['bidang_usaha'],
+					 'jabatan' => $obj['jabatan'],
+					 'nominal_penghasilan' => $obj['nominal_penghasilan'],
+ 					 'penghasilan_lain' => $obj['penghasilan_lain'],
+ 					 'foto_slipgaji' => $slipgaji,
+ 					 'foto_rekkoran' => $rekkoran
+		 );
+		$pengajuan = $this->db->insert('pengajuan', $data);
+			if ($pengajuan) {
+				$this->db->where('id_user', $id_user);
+				$getid = $this->db->get('user')->row();
 
-		return $data;
+				$data1 = array('nama_customers' => $obj['nama_lengkap'],
+							   'ktp' => $obj['ktp'],
+							   'npwp' => $obj['npwp'],
+							   'status' => $obj['status'],
+							   'alamat' => $obj['alamat'],
+							   'jumlah_anak' => $obj['jml_anak'],
+							   'no_hp' => $obj['telp'],
+							   'foto_ktp' => $ktp,
+							   );
+				$this->db->where('id_customers', $getid->id_customers);
+				$lengkapi_data = $this->db->update('customers', $data1);
+
+				return $lengkapi_data;
+			}
+		return $pengajuan;
 	}
 
 	public function simpan_user($obj)
@@ -66,7 +91,7 @@ class M_pengajuan extends CI_Model {
 		return $data;
 	}
 
-	public function simpan_pengajuan($obj, $ktp, $slipgaji, $rekkoran)
+	public function api_simpan_pengajuan($obj, $ktp, $slipgaji, $rekkoran)
 	{
 		$data = array('id_pengajuan' => $this->generate_pengajuan(),
 					 'id_user' => $obj['id_user'],
@@ -121,7 +146,7 @@ class M_pengajuan extends CI_Model {
 		return $data;
 	}
 
-	public function histori_pengajuan($id_user)
+	public function api_histori_pengajuan($id_user)
 	{
 		$this->db->select("A.id_pengajuan, A.id_user, C.nama_customers, D.id_jenis, D.jenis_pinjaman, DATE_FORMAT(A.created_at, '%d-%m-%Y') as tanggal, A.besar_pinjaman, (CASE WHEN A.status_pengajuan = 0 THEN 'Batal' WHEN status_pengajuan = 1 THEN 'Selesai' ELSE 'Proses' END) as status, F.nama_bank");
 		$this->db->from('pengajuan A');
